@@ -101,63 +101,63 @@ class SimpleDrawingActivity : Activity() {
     val Int.dp: Float
         get() = this.toFloat() * resources.displayMetrics.density
 
-    private fun drawTestPattern() {
-        if (!drawingSurface.holder.surface.isValid) {
-            android.util.Log.w(TAG, "Surface not valid in drawTestPattern")
-            return
-        }
-
-        val canvas = drawingSurface.holder.lockCanvas() ?: run {
-            android.util.Log.w(TAG, "Could not lock canvas in drawTestPattern")
-            return
-        }
-
-        try {
-            // Clear the canvas with white background
-            canvas.drawColor(BACKGROUND_COLOR)
-
-            // Draw a border rectangle
-            val borderPaint = Paint().apply {
-                color = Color.BLACK
-                style = Paint.Style.STROKE
-                strokeWidth = 10.dp
-            }
-            canvas.drawRect(20.dp, 20.dp, SCREEN_WIDTH - 20.dp, SCREEN_HEIGHT - 20.dp, borderPaint)
-
-            // Draw some text
-            val textPaint = Paint().apply {
-                color = Color.BLACK
-                textSize = 48.dp
-                textAlign = Paint.Align.CENTER
-            }
-            canvas.drawText("Drawing Test", SCREEN_WIDTH / 2f, 100.dp, textPaint)
-
-            // Draw a circle in the middle
-            val circlePaint = Paint().apply {
-                color = Color.BLACK
-                style = Paint.Style.FILL
-            }
-            canvas.drawCircle(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 100.dp, circlePaint)
-
-            // Draw some diagonal lines
-            val linePaint = Paint().apply {
-                color = Color.BLACK
-                strokeWidth = 5.dp
-                style = Paint.Style.STROKE
-            }
-            canvas.drawLine(20.dp, 20.dp, SCREEN_WIDTH - 20.dp, SCREEN_HEIGHT - 20.dp, linePaint)
-            canvas.drawLine(SCREEN_WIDTH - 20.dp, 20.dp, 20.dp, SCREEN_HEIGHT - 20.dp, linePaint)
-
-            android.util.Log.d(TAG, "Drew test pattern")
-        } catch (e: Exception) {
-            android.util.Log.e(TAG, "Error drawing test pattern: ${e.message}", e)
-        } finally {
-            drawingSurface.holder.unlockCanvasAndPost(canvas)
-        }
-
-        // Refresh the screen to ensure the e-ink display updates
-        refreshScreen()
-    }
+//    private fun drawTestPattern() {
+//        if (!drawingSurface.holder.surface.isValid) {
+//            android.util.Log.w(TAG, "Surface not valid in drawTestPattern")
+//            return
+//        }
+//
+//        val canvas = drawingSurface.holder.lockCanvas() ?: run {
+//            android.util.Log.w(TAG, "Could not lock canvas in drawTestPattern")
+//            return
+//        }
+//
+//        try {
+//            // Clear the canvas with white background
+//            canvas.drawColor(BACKGROUND_COLOR)
+//
+//            // Draw a border rectangle
+//            val borderPaint = Paint().apply {
+//                color = Color.BLACK
+//                style = Paint.Style.STROKE
+//                strokeWidth = 10.dp
+//            }
+//            canvas.drawRect(20.dp, 20.dp, SCREEN_WIDTH - 20.dp, SCREEN_HEIGHT - 20.dp, borderPaint)
+//
+//            // Draw some text
+//            val textPaint = Paint().apply {
+//                color = Color.BLACK
+//                textSize = 48.dp
+//                textAlign = Paint.Align.CENTER
+//            }
+//            canvas.drawText("Drawing Test", SCREEN_WIDTH / 2f, 100.dp, textPaint)
+//
+//            // Draw a circle in the middle
+//            val circlePaint = Paint().apply {
+//                color = Color.BLACK
+//                style = Paint.Style.FILL
+//            }
+//            canvas.drawCircle(SCREEN_WIDTH / 2f, SCREEN_HEIGHT / 2f, 100.dp, circlePaint)
+//
+//            // Draw some diagonal lines
+//            val linePaint = Paint().apply {
+//                color = Color.BLACK
+//                strokeWidth = 5.dp
+//                style = Paint.Style.STROKE
+//            }
+//            canvas.drawLine(20.dp, 20.dp, SCREEN_WIDTH - 20.dp, SCREEN_HEIGHT - 20.dp, linePaint)
+//            canvas.drawLine(SCREEN_WIDTH - 20.dp, 20.dp, 20.dp, SCREEN_HEIGHT - 20.dp, linePaint)
+//
+//            android.util.Log.d(TAG, "Drew test pattern")
+//        } catch (e: Exception) {
+//            android.util.Log.e(TAG, "Error drawing test pattern: ${e.message}", e)
+//        } finally {
+//            drawingSurface.holder.unlockCanvasAndPost(canvas)
+//        }
+//
+//        // Refresh the screen to ensure the e-ink display updates
+//        refreshScreen()
+//    }
 
     private fun checkHiddenApiBypass() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
