@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Toolbar Container -->
+        <LinearLayout
+            android:id="@+id/toolbar_container"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@android:color/white"
+            android:elevation="4dp"
+            android:orientation="horizontal">
+
+            <!-- Pen Type Buttons -->
+            <ImageButton
+                android:id="@+id/button_fountain"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_toolbar_button"
+                android:padding="8dp"
+                android:src="@drawable/ic_brush"
+                android:contentDescription="Fountain Pen" />
+
+            <ImageButton
+                android:id="@+id/button_brush"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_toolbar_button"
+                android:padding="8dp"
+                android:src="@drawable/ic_charcoal"
+                android:contentDescription="Brush Pen" />
+
+            <ImageButton
+                android:id="@+id/button_pencil"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_toolbar_button"
+                android:padding="8dp"
+                android:src="@drawable/ic_pencil"
+                android:contentDescription="Pencil" />
+
+            <ImageButton
+                android:id="@+id/button_charcoal"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_toolbar_button"
+                android:padding="8dp"
+                android:src="@drawable/ic_charcoal_pen"
+                android:contentDescription="Charcoal" />
+
+            <ImageButton
+                android:id="@+id/button_marker"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_toolbar_button"
+                android:padding="8dp"
+                android:src="@drawable/ic_marker"
+                android:contentDescription="Marker" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:layout_margin="8dp"
+                android:background="#CCCCCC" />
+
+            <!-- Eraser Button -->
+            <ImageButton
+                android:id="@+id/button_eraser"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_margin="4dp"
+                android:background="@drawable/bg_toolbar_button"
+                android:padding="8dp"
+                android:src="@drawable/ic_eraser"
+                android:contentDescription="Eraser" />
+
+        </LinearLayout>
+
+        <!-- Drawing Surface -->
+        <SurfaceView
+            android:id="@+id/surface_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+    </LinearLayout>
+</layout>
