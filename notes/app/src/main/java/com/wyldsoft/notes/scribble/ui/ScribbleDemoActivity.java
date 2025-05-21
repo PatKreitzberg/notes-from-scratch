@@ -37,6 +37,10 @@ public class ScribbleDemoActivity extends AppCompatActivity {
         go(ScribbleWebViewDemoActivity.class);
     }
 
+    public void button_notes(View view) {
+        go(ScribbleNotes.class);
+    }
+
     public void button_move_erase_scribble(View view) {
         go(ScribbleMoveEraserDemoActivity.class);
     }

@@ -30,7 +30,7 @@
         <activity android:name=".scribble.ui.ScribbleWebViewDemoActivity"/>
         <activity android:name=".scribble.ui.ScribblePenUpRefreshDemoActivity"/>
         <activity android:name=".scribble.ui.ScribbleEpdControllerDemoActivity"/>
-
+        <activity android:name=".scribble.ui.ScribbleNotes"/>
     </application>
 
 </manifest>

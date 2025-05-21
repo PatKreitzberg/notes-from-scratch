@@ -1,5 +1,7 @@
 package com.wyldsoft.notes.scribble.ui;
 
+import static java.sql.DriverManager.println;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
@@ -167,9 +169,12 @@ public class ScribblePenUpRefreshDemoActivity extends AppCompatActivity {
 
                 @Override
                 public void onPenUpRefresh(RectF refreshRect) {
+                    println("refreshRect ${refreshRect}");
+
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
                         return;
                     }
+
                     getRxManager().enqueue(new PartialRefreshRequest(ScribblePenUpRefreshDemoActivity.this, binding.surfaceview1, refreshRect)
                                     .setBitmap(bitmap),
                             new RxCallback<PartialRefreshRequest>() {

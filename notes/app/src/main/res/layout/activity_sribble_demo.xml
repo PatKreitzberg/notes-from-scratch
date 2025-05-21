@@ -78,5 +78,12 @@
             android:layout_height="wrap_content"
             android:onClick="@{activitySribble::gotoScribbleFingerTouchDemo}"
             android:text="Scribble Finger Touch Demo" />
+
+        <Button
+            android:id="@+id/button_notes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{activitySribble::button_notes}"
+            android:text="Notes" />
     </LinearLayout>
 </layout>
