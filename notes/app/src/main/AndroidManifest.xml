@@ -12,7 +12,7 @@
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
         <activity
-            android:name=".ui.MainActivity"
+            android:name=".scribble.ui.ScribbleNotes"
             android:exported="true"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -20,17 +20,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".ui.PenDemoActivity"/>
-        <activity android:name=".scribble.ui.ScribbleDemoActivity"/>
-        <activity android:name=".scribble.ui.ScribbleMoveEraserDemoActivity"/>
-        <activity android:name=".scribble.ui.ScribbleMultipleScribbleViewActivity"/>
-        <activity android:name=".scribble.ui.ScribbleTouchHelperDemoActivity"/>
-        <activity android:name=".scribble.ui.ScribbleFingerTouchDemoActivity"/>
-        <activity android:name=".scribble.ui.ScribbleWebViewDemoActivity"/>
-        <activity android:name=".scribble.ui.ScribblePenUpRefreshDemoActivity"/>
-        <activity android:name=".scribble.ui.ScribbleEpdControllerDemoActivity"/>
-        <activity android:name=".scribble.ui.ScribbleNotes"/>
     </application>
 
 </manifest>
