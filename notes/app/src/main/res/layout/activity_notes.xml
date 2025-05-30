@@ -5,15 +5,92 @@
             name="activityNotes"
             type="com.wyldsoft.notes.scribble.ui.ScribbleNotes" />
     </data>
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/activity_scribble_demo"
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <SurfaceView
-            android:id="@+id/surfaceview"
+        <!-- Toolbar Container -->
+        <LinearLayout
+            android:id="@+id/toolbar_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="60dp"
+            android:background="@android:color/white"
+            android:elevation="4dp"
+            android:orientation="horizontal"
+            android:padding="8dp">
 
-    </RelativeLayout>
+            <!-- Charcoal Button -->
+            <ImageButton
+                android:id="@+id/button_charcoal"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_margin="2dp"
+                android:padding="8dp"
+                android:src="@drawable/ic_marker_pen"
+                android:contentDescription="Charcoal Pen"
+                android:scaleType="fitCenter" />
+
+            <!-- Fountain Button -->
+            <ImageButton
+                android:id="@+id/button_fountain"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_margin="2dp"
+                android:padding="8dp"
+                android:src="@drawable/ic_pen_fountain"
+                android:contentDescription="Fountain Pen"
+                android:scaleType="fitCenter" />
+
+            <!-- Marker Button -->
+            <ImageButton
+                android:id="@+id/button_marker"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_margin="2dp"
+                android:padding="8dp"
+                android:src="@drawable/ic_pen_hard"
+                android:contentDescription="Marker"
+                android:scaleType="fitCenter" />
+
+            <!-- Neo Brush Button -->
+            <ImageButton
+                android:id="@+id/button_neo_brush"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_margin="2dp"
+                android:padding="8dp"
+                android:src="@drawable/ic_pen_soft"
+                android:contentDescription="Neo Brush"
+                android:scaleType="fitCenter" />
+
+            <!-- Pencil Button -->
+            <ImageButton
+                android:id="@+id/button_pencil"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_margin="2dp"
+                android:padding="8dp"
+                android:src="@drawable/ic_charcoal_pen"
+                android:contentDescription="Pencil"
+                android:scaleType="fitCenter" />
+
+        </LinearLayout>
+
+        <!-- Drawing Surface -->
+        <RelativeLayout
+            android:id="@+id/activity_scribble_demo"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <SurfaceView
+                android:id="@+id/surfaceview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
 </layout>

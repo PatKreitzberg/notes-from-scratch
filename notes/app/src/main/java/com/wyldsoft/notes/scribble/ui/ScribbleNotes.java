@@ -6,11 +6,14 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
+import android.widget.ImageButton;
 import androidx.databinding.DataBindingUtil;
 import com.wyldsoft.notes.R;
 import com.wyldsoft.notes.databinding.ActivityNotesBinding;
@@ -24,6 +27,7 @@ import com.onyx.android.sdk.pen.data.TouchPointList;
 import com.onyx.android.sdk.rx.RxManager;
 import java.util.ArrayList;
 import java.util.List;
+
 public class ScribbleNotes extends AppCompatActivity {
     private static final String TAG = ScribbleNotes.class.getSimpleName();
 
@@ -35,7 +39,11 @@ public class ScribbleNotes extends AppCompatActivity {
     private Bitmap bitmap;
     private Canvas canvas;
 
-    private final float STROKE_WIDTH = 3.0f;
+    // Pen Profile management
+    private PenProfile currentPenProfile;
+    private List<PenProfile> penProfiles;
+    private List<ImageButton> toolbarButtons;
+    private int selectedButtonIndex = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +52,8 @@ public class ScribbleNotes extends AppCompatActivity {
         deviceReceiver.enable(this, true);
         binding.setActivityNotes(this);
 
+        initPenProfiles();
+        initToolbar();
         initPaint();
         initSurfaceView();
         initReceiver();
@@ -78,6 +88,82 @@ public class ScribbleNotes extends AppCompatActivity {
         super.onDestroy();
     }
 
+    private void initPenProfiles() {
+        penProfiles = new ArrayList<>();
+        penProfiles.add(PenProfile.createCharcoalProfile());
+        penProfiles.add(PenProfile.createFountainProfile());
+        penProfiles.add(PenProfile.createMarkerProfile());
+        penProfiles.add(PenProfile.createNeoBrushProfile());
+        penProfiles.add(PenProfile.createPencilProfile());
+
+        // Set default profile
+        currentPenProfile = penProfiles.get(0);
+    }
+
+    private void initToolbar() {
+        toolbarButtons = new ArrayList<>();
+        toolbarButtons.add(binding.buttonCharcoal);
+        toolbarButtons.add(binding.buttonFountain);
+        toolbarButtons.add(binding.buttonMarker);
+        toolbarButtons.add(binding.buttonNeoBrush);
+        toolbarButtons.add(binding.buttonPencil);
+
+        // Set up button backgrounds and click listeners
+        for (int i = 0; i < toolbarButtons.size(); i++) {
+            final int index = i;
+            ImageButton button = toolbarButtons.get(i);
+            PenProfile profile = penProfiles.get(i);
+
+            // Set background color to match stroke color
+            updateButtonAppearance(button, profile.getStrokeColor(), i == selectedButtonIndex);
+
+            button.setOnClickListener(v -> selectPenProfile(index));
+        }
+    }
+
+    private void selectPenProfile(int index) {
+        if (index >= 0 && index < penProfiles.size()) {
+            selectedButtonIndex = index;
+            currentPenProfile = penProfiles.get(index);
+
+            // Update button appearances
+            for (int i = 0; i < toolbarButtons.size(); i++) {
+                ImageButton button = toolbarButtons.get(i);
+                PenProfile profile = penProfiles.get(i);
+                updateButtonAppearance(button, profile.getStrokeColor(), i == selectedButtonIndex);
+            }
+
+            // Update touch helper settings
+            if (touchHelper != null) {
+                touchHelper.setStrokeColor(currentPenProfile.getStrokeColor());
+                touchHelper.setStrokeStyle(currentPenProfile.getStrokeStyle());
+                touchHelper.setStrokeWidth(currentPenProfile.getStrokeSize());
+            }
+
+            // Update paint
+            paint.setColor(currentPenProfile.getStrokeColor());
+            paint.setStrokeWidth(currentPenProfile.getStrokeSize());
+
+            Log.d(TAG, "Selected pen profile: " + index + ", Color: " + currentPenProfile.getStrokeColor() +
+                    ", Style: " + currentPenProfile.getStrokeStyle());
+        }
+    }
+
+    private void updateButtonAppearance(ImageButton button, int backgroundColor, boolean isSelected) {
+        GradientDrawable drawable = new GradientDrawable();
+        drawable.setShape(GradientDrawable.RECTANGLE);
+        drawable.setColor(backgroundColor);
+        drawable.setCornerRadius(8f);
+
+        if (isSelected) {
+            drawable.setStroke(4, Color.BLACK);
+        } else {
+            drawable.setStroke(1, Color.GRAY);
+        }
+
+        button.setBackground(drawable);
+    }
+
     public RxManager getRxManager() {
         if (rxManager == null) {
             rxManager = RxManager.Builder.sharedSingleThreadManager();
@@ -92,8 +178,8 @@ public class ScribbleNotes extends AppCompatActivity {
     private void initPaint() {
         paint.setAntiAlias(true);
         paint.setStyle(Paint.Style.STROKE);
-        paint.setColor(Color.BLACK);
-        paint.setStrokeWidth(STROKE_WIDTH);
+        paint.setColor(currentPenProfile.getStrokeColor());
+        paint.setStrokeWidth(currentPenProfile.getStrokeSize());
     }
 
     private void initSurfaceView() {
@@ -106,10 +192,13 @@ public class ScribbleNotes extends AppCompatActivity {
 
             android.graphics.Rect limit = new android.graphics.Rect();
             binding.surfaceview.getLocalVisibleRect(limit);
-            touchHelper.setStrokeWidth(STROKE_WIDTH)
+            touchHelper.setStrokeWidth(currentPenProfile.getStrokeSize())
                     .setLimitRect(limit, new ArrayList<>())
                     .openRawDrawing();
-            touchHelper.setStrokeStyle(TouchHelper.STROKE_STYLE_FOUNTAIN);
+
+            // Set initial pen profile settings
+            touchHelper.setStrokeStyle(currentPenProfile.getStrokeStyle());
+            touchHelper.setStrokeColor(currentPenProfile.getStrokeColor());
 
             // Automatically enable drawing - no button press required
             touchHelper.setRawDrawingEnabled(true);
@@ -215,6 +304,15 @@ public class ScribbleNotes extends AppCompatActivity {
             canvas = new Canvas(bitmap);
         }
 
+        // Create a new Paint object with the current pen profile settings
+        Paint bitmapPaint = new Paint();
+        bitmapPaint.setAntiAlias(true);
+        bitmapPaint.setStyle(Paint.Style.STROKE);
+        bitmapPaint.setColor(currentPenProfile.getStrokeColor());
+        bitmapPaint.setStrokeWidth(currentPenProfile.getStrokeSize());
+        bitmapPaint.setStrokeCap(Paint.Cap.ROUND);
+        bitmapPaint.setStrokeJoin(Paint.Join.ROUND);
+
         // Use fountain pen style drawing
         Path path = new Path();
         PointF prePoint = new PointF(list.get(0).x, list.get(0).y);
@@ -224,6 +322,11 @@ public class ScribbleNotes extends AppCompatActivity {
             prePoint.x = point.x;
             prePoint.y = point.y;
         }
-        canvas.drawPath(path, paint);
+        canvas.drawPath(path, bitmapPaint);
+    }
+
+    // Helper method to get current pen profile
+    public PenProfile getCurrentPenProfile() {
+        return currentPenProfile;
     }
 }
