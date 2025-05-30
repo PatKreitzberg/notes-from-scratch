@@ -30,6 +30,7 @@ import java.util.List;
 
 public class ScribbleNotes extends AppCompatActivity {
     private static final String TAG = ScribbleNotes.class.getSimpleName();
+    private static final String TAG_PROFILE = "profile";
 
     private ActivityNotesBinding binding;
     private GlobalDeviceReceiver deviceReceiver = new GlobalDeviceReceiver();
@@ -114,39 +115,104 @@ public class ScribbleNotes extends AppCompatActivity {
             ImageButton button = toolbarButtons.get(i);
             PenProfile profile = penProfiles.get(i);
 
-            // Set background color to match stroke color
-            updateButtonAppearance(button, profile.getStrokeColor(), i == selectedButtonIndex);
+            // Set initial appearance
+            updateButtonForProfile(button, profile, i == selectedButtonIndex);
 
             button.setOnClickListener(v -> selectPenProfile(index));
         }
     }
 
     private void selectPenProfile(int index) {
+        Log.d("profile", "selectPenProfile");
         if (index >= 0 && index < penProfiles.size()) {
+            // Check if clicking the already selected profile
+            if (selectedButtonIndex == index) {
+                // Show edit popup
+                Log.d("profile", "show edit popup for index " + index);
+                showProfileEditPopup(index);
+                return;
+            }
+
             selectedButtonIndex = index;
             currentPenProfile = penProfiles.get(index);
 
             // Update button appearances
-            for (int i = 0; i < toolbarButtons.size(); i++) {
-                ImageButton button = toolbarButtons.get(i);
-                PenProfile profile = penProfiles.get(i);
-                updateButtonAppearance(button, profile.getStrokeColor(), i == selectedButtonIndex);
-            }
+            updateAllButtonAppearances();
 
-            // Update touch helper settings
-            if (touchHelper != null) {
-                touchHelper.setStrokeColor(currentPenProfile.getStrokeColor());
-                touchHelper.setStrokeStyle(currentPenProfile.getStrokeStyle());
-                touchHelper.setStrokeWidth(currentPenProfile.getStrokeSize());
-            }
-
-            // Update paint
-            paint.setColor(currentPenProfile.getStrokeColor());
-            paint.setStrokeWidth(currentPenProfile.getStrokeSize());
+            // Update pen settings
+            updatePenSettings();
 
             Log.d(TAG, "Selected pen profile: " + index + ", Color: " + currentPenProfile.getStrokeColor() +
                     ", Style: " + currentPenProfile.getStrokeStyle());
         }
+    }
+
+    private void showProfileEditPopup(int profileIndex) {
+        Log.d(TAG_PROFILE, "showProfileEditPopup");
+        try {
+            PenProfile profileToEdit = penProfiles.get(profileIndex);
+            ImageButton anchorButton = toolbarButtons.get(profileIndex);
+
+            Log.d(TAG_PROFILE, "Showing profile edit popup for index: " + profileIndex);
+
+            ProfileEditPopup popup = new ProfileEditPopup(this, profileToEdit, new ProfileEditPopup.OnProfileChangedListener() {
+                @Override
+                public void onProfileChanged(PenProfile profile) {
+                    // Update the profile in the list
+                    penProfiles.set(profileIndex, profile);
+                    currentPenProfile = profile;
+
+                    // Update button appearance and icon
+                    updateButtonForProfile(anchorButton, profile, true);
+
+                    // Update pen settings
+                    updatePenSettings();
+
+                    Log.d(TAG, "Profile modified: " + profileIndex + ", Color: " + profile.getStrokeColor() +
+                            ", Style: " + profile.getStrokeStyle() + ", Size: " + profile.getStrokeSize());
+                }
+
+                @Override
+                public void onCancelled() {
+                    // Restore original profile if needed
+                    Log.d(TAG, "Profile edit cancelled");
+                }
+            });
+
+            popup.showAsDropDown(anchorButton);
+        } catch (Exception e) {
+            Log.e(TAG_PROFILE, "Error showing profile edit popup", e);
+        }
+    }
+
+    private void updateAllButtonAppearances() {
+        for (int i = 0; i < toolbarButtons.size(); i++) {
+            ImageButton button = toolbarButtons.get(i);
+            PenProfile profile = penProfiles.get(i);
+            updateButtonForProfile(button, profile, i == selectedButtonIndex);
+        }
+    }
+
+    private void updateButtonForProfile(ImageButton button, PenProfile profile, boolean isSelected) {
+        // Update background color
+        updateButtonAppearance(button, profile.getStrokeColor(), isSelected);
+
+        // Update icon based on stroke style
+        int iconRes = ProfileEditPopup.getIconForStrokeStyle(profile.getStrokeStyle());
+        button.setImageResource(iconRes);
+    }
+
+    private void updatePenSettings() {
+        // Update touch helper settings
+        if (touchHelper != null) {
+            touchHelper.setStrokeColor(currentPenProfile.getStrokeColor());
+            touchHelper.setStrokeStyle(currentPenProfile.getStrokeStyle());
+            touchHelper.setStrokeWidth(currentPenProfile.getStrokeSize());
+        }
+
+        // Update paint
+        paint.setColor(currentPenProfile.getStrokeColor());
+        paint.setStrokeWidth(currentPenProfile.getStrokeSize());
     }
 
     private void updateButtonAppearance(ImageButton button, int backgroundColor, boolean isSelected) {
@@ -255,45 +321,45 @@ public class ScribbleNotes extends AppCompatActivity {
 
         @Override
         public void onBeginRawDrawing(boolean b, TouchPoint touchPoint) {
-            Log.d(TAG, "onBeginRawDrawing");
+            //Log.D(TAG, "onBeginRawDrawing");
             TouchUtils.disableFingerTouch(getApplicationContext());
         }
 
         @Override
         public void onEndRawDrawing(boolean b, TouchPoint touchPoint) {
-            Log.d(TAG, "onEndRawDrawing");
+            //Log.D(TAG, "onEndRawDrawing");
             TouchUtils.enableFingerTouch(getApplicationContext());
         }
 
         @Override
         public void onRawDrawingTouchPointMoveReceived(TouchPoint touchPoint) {
-            Log.d(TAG, "onRawDrawingTouchPointMoveReceived");
+            //Log.d(TAG, "onRawDrawingTouchPointMoveReceived");
         }
 
         @Override
         public void onRawDrawingTouchPointListReceived(TouchPointList touchPointList) {
-            Log.d(TAG, "onRawDrawingTouchPointListReceived");
+            //Log.d(TAG, "onRawDrawingTouchPointListReceived");
             drawScribbleToBitmap(touchPointList.getPoints());
         }
 
         @Override
         public void onBeginRawErasing(boolean b, TouchPoint touchPoint) {
-            Log.d(TAG, "onBeginRawErasing");
+            //Log.d(TAG, "onBeginRawErasing");
         }
 
         @Override
         public void onEndRawErasing(boolean b, TouchPoint touchPoint) {
-            Log.d(TAG, "onEndRawErasing");
+            //Log.D(TAG, "onEndRawErasing");
         }
 
         @Override
         public void onRawErasingTouchPointMoveReceived(TouchPoint touchPoint) {
-            Log.d(TAG, "onRawErasingTouchPointMoveReceived");
+            //Log.D(TAG, "onRawErasingTouchPointMoveReceived");
         }
 
         @Override
         public void onRawErasingTouchPointListReceived(TouchPointList touchPointList) {
-            Log.d(TAG, "onRawErasingTouchPointListReceived");
+            //Log.D(TAG, "onRawErasingTouchPointListReceived");
         }
     };
 
