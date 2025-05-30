@@ -150,6 +150,11 @@ public class ScribbleNotes extends AppCompatActivity {
     private void showProfileEditPopup(int profileIndex) {
         Log.d(TAG_PROFILE, "showProfileEditPopup");
         try {
+            // pause drawing
+            if (touchHelper != null) {
+                touchHelper.setRawDrawingEnabled(false);
+            }
+
             PenProfile profileToEdit = penProfiles.get(profileIndex);
             ImageButton anchorButton = toolbarButtons.get(profileIndex);
 
@@ -168,20 +173,36 @@ public class ScribbleNotes extends AppCompatActivity {
                     // Update pen settings
                     updatePenSettings();
 
-                    Log.d(TAG, "Profile modified: " + profileIndex + ", Color: " + profile.getStrokeColor() +
+                    Log.d(TAG_PROFILE, "Profile modified: " + profileIndex + ", Color: " + profile.getStrokeColor() +
                             ", Style: " + profile.getStrokeStyle() + ", Size: " + profile.getStrokeSize());
+
                 }
 
                 @Override
                 public void onCancelled() {
                     // Restore original profile if needed
-                    Log.d(TAG, "Profile edit cancelled");
+                    Log.d(TAG_PROFILE, "Profile edit cancelled");
+
+                    // Resume drawing
+                    if (touchHelper != null) {
+                        touchHelper.setRawDrawingEnabled(true);
+                    }
                 }
             });
 
+            Log.d(TAG_PROFILE, "showAsDropDown " + anchorButton);
             popup.showAsDropDown(anchorButton);
         } catch (Exception e) {
+            // Resume drawing
+            if (touchHelper != null) {
+                touchHelper.setRawDrawingEnabled(true);
+            }
             Log.e(TAG_PROFILE, "Error showing profile edit popup", e);
+        }
+
+        // Resume drawing
+        if (touchHelper != null) {
+            touchHelper.setRawDrawingEnabled(true);
         }
     }
 
