@@ -88,8 +88,8 @@ public class ProfileEditPopup {
                     android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
                     android.view.ViewGroup.LayoutParams.WRAP_CONTENT,
                     true);
-            popupWindow.setWidth(800);
 
+            popupWindow.setWidth(800);
             popupWindow.setOutsideTouchable(true);
             popupWindow.setFocusable(true);
 

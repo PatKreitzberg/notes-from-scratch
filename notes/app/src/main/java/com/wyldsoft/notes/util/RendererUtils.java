@@ -8,15 +8,12 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.view.SurfaceView;
 
-import com.wyldsoft.notes.helper.RendererHelper;
-
 public class RendererUtils {
 
     public static void renderBackground(Canvas canvas,
                                         Rect viewRect) {
         RendererUtils.clearBackground(canvas, new Paint(), viewRect);
     }
-
 
     public static Rect checkSurfaceView(SurfaceView surfaceView) {
         if (surfaceView == null || !surfaceView.getHolder().getSurface().isValid()) {
@@ -31,11 +28,5 @@ public class RendererUtils {
         canvas.drawRect(rect, paint);
     }
 
-    public static Matrix getPointMatrix(final RendererHelper.RenderContext renderContext) {
-        Point anchorPoint = renderContext.viewPoint;
-        Matrix matrix = new Matrix();
-        matrix.postTranslate(anchorPoint.x, anchorPoint.y);
-        return matrix;
-    }
 
 }

@@ -15,11 +15,13 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.ImageButton;
 import androidx.databinding.DataBindingUtil;
+
 import com.wyldsoft.notes.R;
 import com.wyldsoft.notes.databinding.ActivityNotesBinding;
 import com.wyldsoft.notes.scribble.broadcast.GlobalDeviceReceiver;
 import com.wyldsoft.notes.scribble.request.RendererToScreenRequest;
 import com.wyldsoft.notes.scribble.util.TouchUtils;
+
 import com.onyx.android.sdk.data.note.TouchPoint;
 import com.onyx.android.sdk.pen.RawInputCallback;
 import com.onyx.android.sdk.pen.TouchHelper;
