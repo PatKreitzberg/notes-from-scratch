@@ -12,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
 import android.widget.ImageButton;
 import androidx.databinding.DataBindingUtil;
 
@@ -48,6 +47,9 @@ public class ScribbleNotes extends AppCompatActivity {
     private List<ImageButton> toolbarButtons;
     private int selectedButtonIndex = 0;
 
+    private ProfileEditPopup currentPopup;
+    private boolean isPopupShowing = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,14 +70,6 @@ public class ScribbleNotes extends AppCompatActivity {
             touchHelper.setRawDrawingEnabled(true);
         }
         super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        if (touchHelper != null) {
-            touchHelper.setRawDrawingEnabled(false);
-        }
-        super.onPause();
     }
 
     @Override
@@ -125,87 +119,31 @@ public class ScribbleNotes extends AppCompatActivity {
     }
 
     private void selectPenProfile(int index) {
-        Log.d("profile", "selectPenProfile");
-        if (index >= 0 && index < penProfiles.size()) {
-            // Check if clicking the already selected profile
-            if (selectedButtonIndex == index) {
-                // Show edit popup
-                Log.d("profile", "show edit popup for index " + index);
-                showProfileEditPopup(index);
-                return;
-            }
+        Log.d("profile", "selectPenProfile index: " + index);
 
-            selectedButtonIndex = index;
-            currentPenProfile = penProfiles.get(index);
-
-            // Update button appearances
-            updateAllButtonAppearances();
-
-            // Update pen settings
-            updatePenSettings();
-
-            Log.d(TAG, "Selected pen profile: " + index + ", Color: " + currentPenProfile.getStrokeColor() +
-                    ", Style: " + currentPenProfile.getStrokeStyle());
-        }
-    }
-
-    private void showProfileEditPopup(int profileIndex) {
-        Log.d(TAG_PROFILE, "showProfileEditPopup");
-        try {
-            // pause drawing
-            if (touchHelper != null) {
-                touchHelper.setRawDrawingEnabled(false);
-            }
-
-            PenProfile profileToEdit = penProfiles.get(profileIndex);
-            ImageButton anchorButton = toolbarButtons.get(profileIndex);
-
-            Log.d(TAG_PROFILE, "Showing profile edit popup for index: " + profileIndex);
-
-            ProfileEditPopup popup = new ProfileEditPopup(this, profileToEdit, new ProfileEditPopup.OnProfileChangedListener() {
-                @Override
-                public void onProfileChanged(PenProfile profile) {
-                    // Update the profile in the list
-                    penProfiles.set(profileIndex, profile);
-                    currentPenProfile = profile;
-
-                    // Update button appearance and icon
-                    updateButtonForProfile(anchorButton, profile, true);
-
-                    // Update pen settings
-                    updatePenSettings();
-
-                    Log.d(TAG_PROFILE, "Profile modified: " + profileIndex + ", Color: " + profile.getStrokeColor() +
-                            ", Style: " + profile.getStrokeStyle() + ", Size: " + profile.getStrokeSize());
-
-                }
-
-                @Override
-                public void onCancelled() {
-                    // Restore original profile if needed
-                    Log.d(TAG_PROFILE, "Profile edit cancelled");
-
-                    // Resume drawing
-                    if (touchHelper != null) {
-                        touchHelper.setRawDrawingEnabled(true);
-                    }
-                }
-            });
-
-            Log.d(TAG_PROFILE, "showAsDropDown " + anchorButton);
-            popup.showAsDropDown(anchorButton);
-        } catch (Exception e) {
-            // Resume drawing
-            if (touchHelper != null) {
-                touchHelper.setRawDrawingEnabled(true);
-            }
-            Log.e(TAG_PROFILE, "Error showing profile edit popup", e);
+        if (index < 0 || index >= penProfiles.size()) {
+            Log.w("profile", "Invalid profile index: " + index);
+            return;
         }
 
-        // Resume drawing
-        if (touchHelper != null) {
-            touchHelper.setRawDrawingEnabled(true);
+        // Check if clicking the already selected profile
+        if (selectedButtonIndex == index) {
+            // Show edit popup
+            Log.d("profile", "show edit popup for index " + index);
+            showProfileEditPopup(index);
+            return;
         }
+
+        // Switch to different profile
+        selectedButtonIndex = index;
+        currentPenProfile = penProfiles.get(index);
+
+        // Update UI and pen settings
+        updateAllButtonAppearances();
+        updatePenSettings();
+
+        Log.d(TAG, "Selected pen profile: " + index + ", Color: " + currentPenProfile.getStrokeColor() +
+                ", Style: " + currentPenProfile.getStrokeStyle());
     }
 
     private void updateAllButtonAppearances() {
@@ -215,6 +153,134 @@ public class ScribbleNotes extends AppCompatActivity {
             updateButtonForProfile(button, profile, i == selectedButtonIndex);
         }
     }
+
+    private void showProfileEditPopup(int profileIndex) {
+        Log.d(TAG_PROFILE, "showProfileEditPopup for index: " + profileIndex);
+
+        // Dismiss any existing popup first
+        dismissCurrentPopup();
+
+        try {
+            // Pause drawing while popup is shown
+            pauseDrawing();
+
+            PenProfile profileToEdit = penProfiles.get(profileIndex);
+            ImageButton anchorButton = toolbarButtons.get(profileIndex);
+
+            currentPopup = new ProfileEditPopup(this, profileToEdit, new ProfileEditPopupListener(profileIndex));
+            isPopupShowing = true;
+
+            currentPopup.showAsDropDown(anchorButton);
+
+            Log.d(TAG_PROFILE, "Profile edit popup shown for index: " + profileIndex);
+
+        } catch (Exception e) {
+            Log.e(TAG_PROFILE, "Error showing profile edit popup", e);
+            // Cleanup on error
+            cleanupPopup();
+            resumeDrawing();
+        }
+    }
+
+    private void dismissCurrentPopup() {
+        if (currentPopup != null) {
+            try {
+                Log.d(TAG_PROFILE, "Dismissing current popup");
+                currentPopup.dismiss(); // This should trigger the dismiss listener
+                resumeDrawing();
+                cleanupPopup();
+            } catch (Exception e) {
+                Log.e(TAG_PROFILE, "Error dismissing popup", e);
+                // Force cleanup even if dismiss fails
+                cleanupPopup();
+                resumeDrawing();
+            }
+        }
+    }
+
+    private void cleanupPopup() {
+        currentPopup = null;
+        isPopupShowing = false;
+    }
+
+    private void pauseDrawing() {
+        if (touchHelper != null) {
+            touchHelper.setRawDrawingEnabled(false);
+            Log.d(TAG_PROFILE, "Drawing paused");
+        }
+    }
+
+    private void resumeDrawing() {
+        if (touchHelper != null && !isPopupShowing) {
+            touchHelper.setRawDrawingEnabled(true);
+            Log.d(TAG_PROFILE, "Drawing resumed");
+        }
+    }
+
+    private class ProfileEditPopupListener implements ProfileEditPopup.OnProfileChangedListener {
+        private final int profileIndex;
+
+        public ProfileEditPopupListener(int profileIndex) {
+            this.profileIndex = profileIndex;
+        }
+
+        @Override
+        public void onProfileChanged(PenProfile profile) {
+            Log.d(TAG_PROFILE, "Profile changed for index: " + profileIndex);
+
+            // Update the profile in the list
+            penProfiles.set(profileIndex, profile);
+            currentPenProfile = profile;
+
+            // Update UI
+            ImageButton button = toolbarButtons.get(profileIndex);
+            updateButtonForProfile(button, profile, true);
+            updatePenSettings();
+
+            Log.d(TAG_PROFILE, "Profile modified: " + profileIndex +
+                    ", Color: " + profile.getStrokeColor() +
+                    ", Style: " + profile.getStrokeStyle() +
+                    ", Size: " + profile.getStrokeSize());
+        }
+
+        @Override
+        public void onCancelled() {
+            Log.d(TAG_PROFILE, "Profile edit cancelled or dismissed");
+            handlePopupDismissal();
+        }
+
+        @Override
+        public void onPopupDismissed() {
+            Log.d(TAG_PROFILE, "Popup dismissed");
+            handlePopupDismissal();
+        }
+
+        // Handle popup dismissal (both cancel and completion)
+        private void handlePopupDismissal() {
+            Log.d(TAG_PROFILE, "handlePopupDismissal");
+            cleanupPopup();
+            resumeDrawing();
+        }
+    }
+
+
+    @Override
+    protected void onPause() {
+        dismissCurrentPopup();
+        super.onPause();
+    }
+
+    // Add method to handle back press
+    @Override
+    public void onBackPressed() {
+        if (isPopupShowing) {
+            dismissCurrentPopup();
+            resumeDrawing();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
 
     private void updateButtonForProfile(ImageButton button, PenProfile profile, boolean isSelected) {
         // Update background color

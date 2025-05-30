@@ -3,6 +3,7 @@ package com.wyldsoft.notes.scribble.ui;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -18,16 +19,21 @@ import java.util.List;
 import java.util.Locale;
 
 public class ProfileEditPopup {
+    private static final String TAG = "ProfileEditPopup";
 
     public interface OnProfileChangedListener {
         void onProfileChanged(PenProfile profile);
         void onCancelled();
+
+        void onPopupDismissed();
     }
 
     private PopupWindow popupWindow;
     private PenProfile originalProfile;
     private PenProfile workingProfile;
     private OnProfileChangedListener listener;
+    private Runnable dismissListener;
+    private boolean isShowing = false;
 
     // UI components
     private List<ImageButton> styleButtons;
@@ -93,6 +99,14 @@ public class ProfileEditPopup {
             popupWindow.setOutsideTouchable(true);
             popupWindow.setFocusable(true);
 
+            // Add dismiss listener to handle cleanup
+            popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+                @Override
+                public void onDismiss() {
+                    handleDismiss();
+                }
+            });
+
             // Add border
             GradientDrawable background = new GradientDrawable();
             background.setColor(Color.WHITE);
@@ -104,7 +118,7 @@ public class ProfileEditPopup {
             setupListeners();
             updateUI();
         } catch (Exception e) {
-            android.util.Log.e("ProfileEditPopup", "Error initializing popup", e);
+            Log.e(TAG, "Error initializing popup", e);
         }
     }
 
@@ -142,6 +156,7 @@ public class ProfileEditPopup {
                 if (listener != null) {
                     listener.onProfileChanged(workingProfile);
                 }
+                // Don't auto-dismiss on color change - let user continue editing
             });
 
             colorSquares.add(colorSquare);
@@ -152,9 +167,10 @@ public class ProfileEditPopup {
         sizeSlider = contentView.findViewById(R.id.size_slider);
         sizeValue = contentView.findViewById(R.id.size_value);
 
-        // Initialize cancel button
+        // Initialize cancel button with explicit dismiss
         Button cancelButton = contentView.findViewById(R.id.cancel_button);
         cancelButton.setOnClickListener(v -> {
+            Log.d(TAG, "Cancel button clicked");
             if (listener != null) {
                 listener.onCancelled();
             }
@@ -172,6 +188,7 @@ public class ProfileEditPopup {
                 if (listener != null) {
                     listener.onProfileChanged(workingProfile);
                 }
+                // Don't auto-dismiss on style change - let user continue editing
             });
         }
 
@@ -186,6 +203,7 @@ public class ProfileEditPopup {
                     if (listener != null) {
                         listener.onProfileChanged(workingProfile);
                     }
+                    // Don't auto-dismiss on size change
                 }
             }
 
@@ -248,20 +266,51 @@ public class ProfileEditPopup {
         sizeValue.setText(String.format(Locale.getDefault(), "%.1f", size));
     }
 
+    // Improved show method with state tracking
     public void showAsDropDown(View anchor) {
         try {
-            if (popupWindow != null && !popupWindow.isShowing()) {
+            if (popupWindow != null && !isShowing) {
                 popupWindow.showAsDropDown(anchor, 0, 10);
+                isShowing = true;
+                Log.d(TAG, "Popup shown successfully");
             }
         } catch (Exception e) {
-            android.util.Log.e("ProfileEditPopup", "Error showing popup", e);
+            Log.e(TAG, "Error showing popup", e);
+            isShowing = false;
         }
     }
 
+    // Improved dismiss method
     public void dismiss() {
-        if (popupWindow != null && popupWindow.isShowing()) {
-            popupWindow.dismiss();
+        if (popupWindow != null && isShowing) {
+            try {
+                popupWindow.dismiss();
+                Log.d(TAG, "Popup dismissed");
+            } catch (Exception e) {
+                Log.e(TAG, "Error dismissing popup", e);
+            }
         }
+    }
+
+    // Handle all dismissal scenarios
+    private void handleDismiss() {
+        Log.d(TAG, "handleDismiss called");
+        isShowing = false;
+
+        // Call the dismiss listener if set
+        if (dismissListener != null) {
+            dismissListener.run();
+        }
+    }
+
+    // Add method to set dismiss listener
+    public void setOnDismissListener(Runnable listener) {
+        this.dismissListener = listener;
+    }
+
+    // Add method to check if popup is showing
+    public boolean isShowing() {
+        return isShowing && popupWindow != null && popupWindow.isShowing();
     }
 
     public static int getIconForStrokeStyle(int strokeStyle) {
