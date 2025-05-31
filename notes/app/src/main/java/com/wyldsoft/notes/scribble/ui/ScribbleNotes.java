@@ -245,21 +245,34 @@ public class ScribbleNotes extends AppCompatActivity {
 
         @Override
         public void onCancelled() {
-            Log.d(TAG_PROFILE, "Profile edit cancelled or dismissed");
+            Log.d(TAG_PROFILE, "Profile edit cancelled");
             handlePopupDismissal();
         }
 
         @Override
         public void onPopupDismissed() {
-            Log.d(TAG_PROFILE, "Popup dismissed");
+            Log.d(TAG_PROFILE, "Popup dismissed - calling resumeDrawing");
             handlePopupDismissal();
         }
 
         // Handle popup dismissal (both cancel and completion)
         private void handlePopupDismissal() {
-            Log.d(TAG_PROFILE, "handlePopupDismissal");
+            Log.d(TAG_PROFILE, "handlePopupDismissal - cleaning up and resuming drawing");
             cleanupPopup();
             resumeDrawing();
+
+            // Additional screen refresh to ensure popup visual is completely gone
+            if (binding.surfaceview != null) {
+                binding.surfaceview.postDelayed(() -> {
+                    binding.surfaceview.invalidate();
+                    binding.getRoot().invalidate();
+
+                    // Force a complete screen refresh
+                    if (bitmap != null) {
+                        renderToScreen(binding.surfaceview, bitmap);
+                    }
+                }, 50); // Small delay to ensure popup is fully dismissed
+            }
         }
     }
 

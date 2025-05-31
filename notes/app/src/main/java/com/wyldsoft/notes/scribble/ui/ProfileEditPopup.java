@@ -24,7 +24,6 @@ public class ProfileEditPopup {
     public interface OnProfileChangedListener {
         void onProfileChanged(PenProfile profile);
         void onCancelled();
-
         void onPopupDismissed();
     }
 
@@ -32,7 +31,6 @@ public class ProfileEditPopup {
     private PenProfile originalProfile;
     private PenProfile workingProfile;
     private OnProfileChangedListener listener;
-    private Runnable dismissListener;
     private boolean isShowing = false;
 
     // UI components
@@ -99,7 +97,7 @@ public class ProfileEditPopup {
             popupWindow.setOutsideTouchable(true);
             popupWindow.setFocusable(true);
 
-            // Add dismiss listener to handle cleanup
+            // Add dismiss listener to handle cleanup - THIS IS THE KEY CHANGE
             popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
                 @Override
                 public void onDismiss() {
@@ -284,33 +282,59 @@ public class ProfileEditPopup {
     public void dismiss() {
         if (popupWindow != null && isShowing) {
             try {
+                // First set the flag to prevent multiple dismissals
+                isShowing = false;
+
+                // Dismiss the popup window
                 popupWindow.dismiss();
-                Log.d(TAG, "Popup dismissed");
+
+                // Clear the popup window reference to ensure cleanup
+                popupWindow = null;
+
+                Log.d(TAG, "Popup dismissed and cleaned up");
             } catch (Exception e) {
                 Log.e(TAG, "Error dismissing popup", e);
+                // Force cleanup even on error
+                isShowing = false;
+                popupWindow = null;
             }
         }
     }
 
-    // Handle all dismissal scenarios
+    // UPDATED: Handle all dismissal scenarios - calls listener.onPopupDismissed()
     private void handleDismiss() {
         Log.d(TAG, "handleDismiss called");
         isShowing = false;
 
-        // Call the dismiss listener if set
-        if (dismissListener != null) {
-            dismissListener.run();
+        // Call the popup dismissed listener - THIS IS THE KEY ADDITION
+        if (listener != null) {
+            listener.onPopupDismissed();
         }
-    }
 
-    // Add method to set dismiss listener
-    public void setOnDismissListener(Runnable listener) {
-        this.dismissListener = listener;
+        // Clear the popup window reference to ensure complete cleanup
+        popupWindow = null;
     }
 
     // Add method to check if popup is showing
     public boolean isShowing() {
         return isShowing && popupWindow != null && popupWindow.isShowing();
+    }
+
+    // Force cleanup method for cases where normal dismiss doesn't work
+    public void forceCleanup() {
+        Log.d(TAG, "Force cleanup called");
+        isShowing = false;
+        if (popupWindow != null) {
+            try {
+                if (popupWindow.isShowing()) {
+                    popupWindow.dismiss();
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error in force cleanup", e);
+            } finally {
+                popupWindow = null;
+            }
+        }
     }
 
     public static int getIconForStrokeStyle(int strokeStyle) {
