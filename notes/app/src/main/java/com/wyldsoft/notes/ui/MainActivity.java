@@ -9,7 +9,7 @@ import androidx.databinding.DataBindingUtil;
 
 import com.wyldsoft.notes.R;
 import com.wyldsoft.notes.databinding.ActivityMainBinding;
-import com.wyldsoft.notes.scribble.ui.ScribbleDemoActivity;
+import com.wyldsoft.notes.scribble.ui.ScribbleNotes;
 
 public class MainActivity extends Activity {
 
@@ -20,13 +20,7 @@ public class MainActivity extends Activity {
         binding.buttonScribbleDemo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                go(ScribbleDemoActivity.class);
-            }
-        });
-        binding.buttonPenDemo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                go(PenDemoActivity.class);
+                go(ScribbleNotes.class);
             }
         });
     }
