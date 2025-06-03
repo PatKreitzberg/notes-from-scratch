@@ -3,7 +3,7 @@
     package="com.wyldsoft.notes">
 
     <application
-        android:name=".DemoApplication"
+        android:name=".ScrotesApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -12,7 +12,7 @@
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
         <activity
-            android:name=".scribble.ui.ScribbleNotes"
+            android:name=".MainActivity"
             android:exported="true"
             android:screenOrientation="portrait">
             <intent-filter>

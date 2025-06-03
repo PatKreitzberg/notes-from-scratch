@@ -3,7 +3,7 @@
     <data>
         <variable
             name="activityNotes"
-            type="com.wyldsoft.notes.scribble.ui.ScribbleNotes" />
+            type="com.wyldsoft.notes.MainActivity" />
     </data>
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/activity_scribble_demo"
